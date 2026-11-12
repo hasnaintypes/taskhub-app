@@ -18,6 +18,8 @@ class TaskSerializer(serializers.ModelSerializer):
 
     assigned_to = serializers.PrimaryKeyRelatedField(read_only=True)
     created_by = serializers.PrimaryKeyRelatedField(read_only=True)
+    # Avoids an N+1 user lookup per row on the frontend's task table.
+    assigned_to_username = serializers.CharField(source="assigned_to.username", read_only=True, default=None)
 
     class Meta:
         model = Task
@@ -27,6 +29,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "description",
             "status",
             "assigned_to",
+            "assigned_to_username",
             "created_by",
             "created_at",
             "updated_at",
