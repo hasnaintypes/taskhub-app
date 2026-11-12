@@ -31,7 +31,10 @@ class TestAuthentication:
 
     def test_anonymous_access_to_private_api_is_rejected(self, api_client):
         response = api_client.get("/api/auth/me/")
-        assert response.status_code == 403  # IsAuthenticated -> Forbidden under SessionAuthentication
+        # 401, not 403: "not logged in" vs. "logged in but forbidden" must
+        # stay distinguishable so the frontend knows when to redirect to
+        # login (see config/exceptions.py custom_exception_handler).
+        assert response.status_code == 401
 
     def test_logout_invalidates_session(self, login, admin_user):
         client, csrf_token = login("admin")
