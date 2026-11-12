@@ -1,17 +1,78 @@
 @if (authService.isAuthenticated()) {
-  <mat-toolbar color="primary">
-    <span class="brand">TaskHub</span>
-    <a mat-button routerLink="/dashboard">Dashboard</a>
-    <a mat-button routerLink="/tasks">Tasks</a>
-    @if (authService.canManageTasks()) {
-      <a mat-button routerLink="/users">Users</a>
-    }
-    <span class="spacer"></span>
-    <span class="role-badge">{{ authService.currentUser()?.username }} · {{ authService.role() }}</span>
-    <button mat-icon-button (click)="logout()" aria-label="Log out">
-      <mat-icon>logout</mat-icon>
-    </button>
-  </mat-toolbar>
-}
+  <aside
+    class="fixed left-0 top-0 h-screen w-[240px] bg-surface-container-low border-r border-surface-container-high flex flex-col justify-between p-4 z-40"
+  >
+    <div class="flex flex-col gap-6">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded bg-on-surface flex items-center justify-center text-surface-container-lowest">
+          <span class="material-symbols-outlined text-[16px]">check_box</span>
+        </div>
+        <span class="font-section-header text-section-header text-on-surface">TaskHub</span>
+      </div>
 
-<router-outlet></router-outlet>
+      <nav class="flex flex-col gap-1">
+        <a
+          routerLink="/dashboard"
+          routerLinkActive="bg-surface-container-high text-on-surface font-body-medium"
+          [routerLinkActiveOptions]="{ exact: false }"
+          class="flex items-center gap-2.5 px-2.5 py-1.5 rounded transition-colors text-on-surface-variant font-body-default text-body-default hover:bg-surface-container hover:text-on-surface"
+        >
+          <span class="material-symbols-outlined text-[16px]">grid_view</span>
+          <span>Dashboard</span>
+        </a>
+        <a
+          routerLink="/tasks"
+          routerLinkActive="bg-surface-container-high text-on-surface font-body-medium"
+          class="flex items-center gap-2.5 px-2.5 py-1.5 rounded transition-colors text-on-surface-variant font-body-default text-body-default hover:bg-surface-container hover:text-on-surface"
+        >
+          <span class="material-symbols-outlined text-[16px]">check_circle</span>
+          <span>Tasks</span>
+        </a>
+        @if (authService.canManageTasks()) {
+          <a
+            routerLink="/users"
+            routerLinkActive="bg-surface-container-high text-on-surface font-body-medium"
+            class="flex items-center justify-between px-2.5 py-1.5 rounded transition-colors text-on-surface-variant font-body-default text-body-default hover:bg-surface-container hover:text-on-surface"
+          >
+            <div class="flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-[16px]">group</span>
+              <span>Users</span>
+            </div>
+          </a>
+        }
+      </nav>
+    </div>
+
+    <div class="border-t border-surface-container-high pt-4 flex items-center justify-between">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div
+          class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface font-secondary-medium text-secondary-medium flex-shrink-0"
+        >
+          {{ initials }}
+        </div>
+        <div class="flex flex-col leading-tight min-w-0">
+          <span class="font-body-medium text-body-medium text-on-surface truncate">{{
+            authService.currentUser()?.username
+          }}</span>
+          <span class="font-label-sm text-label-sm text-secondary">{{ authService.role() }}</span>
+        </div>
+      </div>
+      <button
+        aria-label="Log out"
+        (click)="logout()"
+        class="p-1 rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors flex-shrink-0"
+        type="button"
+      >
+        <span class="material-symbols-outlined text-[16px]">logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="pl-[240px] min-h-screen bg-surface-container-lowest">
+    <main class="w-full max-w-6xl mx-auto px-10 py-8">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+} @else {
+  <router-outlet></router-outlet>
+}

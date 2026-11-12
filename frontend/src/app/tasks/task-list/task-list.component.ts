@@ -1,32 +1,19 @@
 import { Component, inject, signal } from '@angular/core';
+import { DatePipe, NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { MatTableModule } from '@angular/material/table';
-import { MatButtonModule } from '@angular/material/button';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatCardModule } from '@angular/material/card';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatIconModule } from '@angular/material/icon';
 
 import { TaskService } from '../../core/services/task.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Task } from '../../core/models/task.model';
+import { initialsOf, statusChipClasses, statusDotClasses, statusLabel } from '../../core/utils/task-status';
 
 type ViewState = 'loading' | 'ready' | 'error';
 
 @Component({
   selector: 'app-task-list',
   standalone: true,
-  imports: [
-    RouterLink,
-    MatTableModule,
-    MatButtonModule,
-    MatChipsModule,
-    MatCardModule,
-    MatProgressSpinnerModule,
-    MatIconModule,
-  ],
+  imports: [RouterLink, NgClass, DatePipe],
   templateUrl: './task-list.component.html',
-  styleUrl: './task-list.component.css',
 })
 export class TaskListComponent {
   private readonly taskService = inject(TaskService);
@@ -34,7 +21,11 @@ export class TaskListComponent {
 
   readonly state = signal<ViewState>('loading');
   readonly tasks = signal<Task[]>([]);
-  readonly displayedColumns = ['title', 'status', 'assigned_to', 'actions'];
+
+  readonly statusLabel = statusLabel;
+  readonly statusChipClasses = statusChipClasses;
+  readonly statusDotClasses = statusDotClasses;
+  readonly initialsOf = initialsOf;
 
   constructor() {
     this.load();

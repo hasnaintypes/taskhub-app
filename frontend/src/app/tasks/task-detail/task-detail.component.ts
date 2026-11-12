@@ -1,19 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDividerModule } from '@angular/material/divider';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { TaskService } from '../../core/services/task.service';
 import { UserService } from '../../core/services/user.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Task, TaskStatus } from '../../core/models/task.model';
 import { User } from '../../core/models/user.model';
+import { statusLabel } from '../../core/utils/task-status';
 
 type ViewState = 'loading' | 'ready' | 'error' | 'not-found';
 
@@ -22,18 +16,8 @@ const STATUS_OPTIONS: TaskStatus[] = ['pending', 'in_progress', 'completed'];
 @Component({
   selector: 'app-task-detail',
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatProgressSpinnerModule,
-    MatDividerModule,
-  ],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './task-detail.component.html',
-  styleUrl: './task-detail.component.css',
 })
 export class TaskDetailComponent {
   private readonly fb = inject(FormBuilder);
@@ -43,12 +27,14 @@ export class TaskDetailComponent {
   readonly authService = inject(AuthService);
 
   readonly statusOptions = STATUS_OPTIONS;
+  readonly statusLabel = statusLabel;
   readonly state = signal<ViewState>('loading');
   readonly task = signal<Task | null>(null);
   readonly users = signal<User[]>([]);
   readonly saving = signal(false);
   readonly assigning = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly successMessage = signal<string | null>(null);
 
   readonly editForm = this.fb.nonNullable.group({
     title: ['', Validators.required],
@@ -97,10 +83,12 @@ export class TaskDetailComponent {
 
     this.saving.set(true);
     this.errorMessage.set(null);
+    this.successMessage.set(null);
     this.taskService.updateFields(task.id, this.editForm.getRawValue()).subscribe({
       next: (updated) => {
         this.task.set(updated);
         this.saving.set(false);
+        this.successMessage.set('Changes saved.');
       },
       error: () => {
         this.saving.set(false);
@@ -115,6 +103,7 @@ export class TaskDetailComponent {
 
     this.saving.set(true);
     this.errorMessage.set(null);
+    this.successMessage.set(null);
     this.taskService.updateStatus(task.id, this.statusForm.getRawValue().status).subscribe({
       next: (updated) => {
         // The status-only endpoint's response only carries {id, status} —
@@ -122,6 +111,7 @@ export class TaskDetailComponent {
         // from the view after a status-only save.
         this.task.update((current) => (current ? { ...current, status: updated.status } : current));
         this.saving.set(false);
+        this.successMessage.set('Status updated.');
       },
       error: () => {
         this.saving.set(false);
@@ -137,9 +127,11 @@ export class TaskDetailComponent {
 
     this.assigning.set(true);
     this.errorMessage.set(null);
+    this.successMessage.set(null);
     this.taskService.assign(task.id, assignedTo).subscribe({
       next: () => {
         this.assigning.set(false);
+        this.successMessage.set('Task assigned — notification queued.');
         this.load();
       },
       error: () => {

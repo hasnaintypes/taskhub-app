@@ -1,11 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
+import { Router, RouterLink } from '@angular/router';
 
 import { TaskService } from '../../core/services/task.service';
 import { UserService } from '../../core/services/user.service';
@@ -14,16 +9,8 @@ import { User } from '../../core/models/user.model';
 @Component({
   selector: 'app-task-create',
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-  ],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './task-create.component.html',
-  styleUrl: './task-create.component.css',
 })
 export class TaskCreateComponent {
   private readonly fb = inject(FormBuilder);

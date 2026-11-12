@@ -1,34 +1,18 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatTableModule } from '@angular/material/table';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { UserService } from '../../core/services/user.service';
 import { AuthService } from '../../core/services/auth.service';
 import { User, Role } from '../../core/models/user.model';
+import { initialsOf } from '../../core/utils/task-status';
 
 type ViewState = 'loading' | 'ready' | 'error';
 
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    MatTableModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatProgressSpinnerModule,
-  ],
+  imports: [ReactiveFormsModule],
   templateUrl: './user-list.component.html',
-  styleUrl: './user-list.component.css',
 })
 export class UserListComponent {
   private readonly fb = inject(FormBuilder);
@@ -37,10 +21,10 @@ export class UserListComponent {
 
   readonly state = signal<ViewState>('loading');
   readonly users = signal<User[]>([]);
-  readonly displayedColumns = ['username', 'email', 'role'];
   readonly creating = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly roles: Role[] = ['ADMIN', 'MANAGER', 'EMPLOYEE'];
+  readonly initialsOf = initialsOf;
 
   readonly createForm = this.fb.nonNullable.group({
     username: ['', Validators.required],

@@ -1,40 +1,54 @@
-<div class="login-page">
-  <mat-card class="login-card">
-    <mat-card-header>
-      <mat-card-title>TaskHub</mat-card-title>
-      <mat-card-subtitle>Sign in to continue</mat-card-subtitle>
-    </mat-card-header>
+<div class="min-h-screen flex items-center justify-center bg-surface-container-lowest px-4">
+  <div class="w-full max-w-sm bg-surface-container-lowest border border-surface-container-high rounded-[6px] shadow-sm p-6 flex flex-col gap-5">
+    <div class="flex flex-col items-center gap-2">
+      <div class="w-8 h-8 rounded bg-on-surface flex items-center justify-center text-surface-container-lowest">
+        <span class="material-symbols-outlined text-[18px]">check_box</span>
+      </div>
+      <h1 class="font-headline-md text-headline-md text-on-surface">TaskHub</h1>
+      <p class="font-body-default text-body-default text-secondary">Sign in to continue</p>
+    </div>
 
-    <mat-card-content>
-      <form [formGroup]="form" (ngSubmit)="submit()" class="login-form">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Username</mat-label>
-          <input matInput formControlName="username" autocomplete="username" />
-          @if (form.controls.username.touched && form.controls.username.invalid) {
-            <mat-error>Username is required.</mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Password</mat-label>
-          <input matInput type="password" formControlName="password" autocomplete="current-password" />
-          @if (form.controls.password.touched && form.controls.password.invalid) {
-            <mat-error>Password is required.</mat-error>
-          }
-        </mat-form-field>
-
-        @if (errorMessage()) {
-          <p class="error-banner" role="alert">{{ errorMessage() }}</p>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-3">
+      <div class="flex flex-col gap-1">
+        <label class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Username</label>
+        <input
+          formControlName="username"
+          autocomplete="username"
+          type="text"
+          class="h-9 px-2.5 text-[13px] bg-surface-container-low rounded focus:outline-none focus:ring-1 focus:ring-primary-container text-on-surface placeholder:text-secondary/60"
+        />
+        @if (form.controls.username.touched && form.controls.username.invalid) {
+          <span class="text-error font-label-sm text-label-sm">Username is required.</span>
         }
+      </div>
 
-        <button mat-flat-button color="primary" type="submit" class="full-width" [disabled]="loading()">
-          @if (loading()) {
-            <mat-spinner diameter="20"></mat-spinner>
-          } @else {
-            Sign in
-          }
-        </button>
-      </form>
-    </mat-card-content>
-  </mat-card>
+      <div class="flex flex-col gap-1">
+        <label class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Password</label>
+        <input
+          formControlName="password"
+          autocomplete="current-password"
+          type="password"
+          class="h-9 px-2.5 text-[13px] bg-surface-container-low rounded focus:outline-none focus:ring-1 focus:ring-primary-container text-on-surface placeholder:text-secondary/60"
+        />
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <span class="text-error font-label-sm text-label-sm">Password is required.</span>
+        }
+      </div>
+
+      @if (errorMessage()) {
+        <p class="text-error font-body-default text-body-default" role="alert">{{ errorMessage() }}</p>
+      }
+
+      <button
+        type="submit"
+        [disabled]="loading()"
+        class="h-9 mt-1 inline-flex items-center justify-center gap-1.5 rounded-[6px] bg-on-surface text-on-primary font-body-medium text-body-medium hover:opacity-90 active:scale-[0.99] transition-all disabled:opacity-60"
+      >
+        @if (loading()) {
+          <span class="w-3.5 h-3.5 border-2 border-surface-container-lowest/40 border-t-surface-container-lowest rounded-full animate-spin"></span>
+        }
+        Sign in
+      </button>
+    </form>
+  </div>
 </div>

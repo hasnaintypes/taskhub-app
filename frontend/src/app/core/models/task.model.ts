@@ -6,6 +6,7 @@ export interface Task {
   description: string;
   status: TaskStatus;
   assigned_to: number | null;
+  assigned_to_username: string | null;
   created_by: number;
   created_at: string;
   updated_at: string;

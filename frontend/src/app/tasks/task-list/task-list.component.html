@@ -1,66 +1,96 @@
-<div class="task-list-page">
-  <div class="header-row">
-    <h1>Tasks</h1>
+<div class="flex flex-col w-full">
+  <header class="flex items-center justify-between pb-6">
+    <div class="flex flex-col">
+      <h1 class="font-headline-lg text-headline-lg text-on-surface">Tasks</h1>
+      <p class="font-body-default text-body-default text-secondary mt-1">Tasks you are authorized to view.</p>
+    </div>
     @if (authService.canManageTasks()) {
-      <button mat-flat-button color="primary" routerLink="/tasks/new">
-        <mat-icon>add</mat-icon>
-        New task
+      <button
+        routerLink="/tasks/new"
+        class="inline-flex items-center gap-1.5 text-on-primary font-body-medium text-body-medium px-3.5 py-1.5 rounded-[6px] hover:opacity-90 active:scale-[0.99] transition-all bg-on-surface"
+        type="button"
+      >
+        <span class="material-symbols-outlined text-[15px] leading-none">add</span>
+        <span>New Task</span>
       </button>
     }
-  </div>
+  </header>
 
   @switch (state()) {
     @case ('loading') {
-      <div class="centered">
-        <mat-spinner diameter="40"></mat-spinner>
+      <div class="flex justify-center py-16">
+        <span class="w-6 h-6 border-2 border-surface-container-high border-t-on-surface rounded-full animate-spin"></span>
       </div>
     }
     @case ('error') {
-      <mat-card class="state-card">
-        <mat-card-content>
-          <p>Could not load tasks.</p>
-          <button mat-stroked-button (click)="load()">Retry</button>
-        </mat-card-content>
-      </mat-card>
+      <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] p-4 shadow-sm max-w-sm">
+        <p class="font-body-default text-body-default text-secondary mb-2">Could not load tasks.</p>
+        <button
+          (click)="load()"
+          class="px-3 py-1.5 rounded text-[13px] font-medium text-on-surface border border-surface-container-high hover:bg-surface-container transition-colors"
+        >
+          Retry
+        </button>
+      </div>
     }
     @case ('ready') {
       @if (tasks().length === 0) {
-        <mat-card class="state-card">
-          <mat-card-content>
-            <p>No tasks assigned to you yet.</p>
-          </mat-card-content>
-        </mat-card>
+        <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] p-4 shadow-sm max-w-sm">
+          <p class="font-body-default text-body-default text-secondary">No tasks assigned to you yet.</p>
+        </div>
       } @else {
-        <table mat-table [dataSource]="tasks()" class="task-table">
-          <ng-container matColumnDef="title">
-            <th mat-header-cell *matHeaderCellDef>Title</th>
-            <td mat-cell *matCellDef="let task">{{ task.title }}</td>
-          </ng-container>
+        <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] overflow-hidden shadow-sm">
+          <div class="bg-surface-container-low px-4 py-2.5 flex items-center text-secondary font-label-sm text-label-sm uppercase tracking-wider select-none">
+            <div class="w-5/12 min-w-0 pr-4">Task</div>
+            <div class="w-2/12 min-w-0 pr-4">Status</div>
+            <div class="w-3/12 min-w-0 pr-4">Assigned To</div>
+            <div class="w-2/12 min-w-0 text-right">Updated</div>
+          </div>
 
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let task">
-              <mat-chip-set>
-                <mat-chip>{{ task.status }}</mat-chip>
-              </mat-chip-set>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="assigned_to">
-            <th mat-header-cell *matHeaderCellDef>Assigned to</th>
-            <td mat-cell *matCellDef="let task">{{ task.assigned_to ?? '—' }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef></th>
-            <td mat-cell *matCellDef="let task">
-              <button mat-button [routerLink]="['/tasks', task.id]">View</button>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-        </table>
+          @for (task of tasks(); track task.id) {
+            <a
+              [routerLink]="['/tasks', task.id]"
+              class="px-4 py-3 flex items-center font-body-default text-body-default hover:bg-surface-container-low/50 transition-colors group cursor-pointer border-t border-surface-container-high"
+            >
+              <div class="w-5/12 min-w-0 pr-4 flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-[16px] text-secondary flex-shrink-0">{{
+                  task.status === 'completed' ? 'check_circle' : 'radio_button_unchecked'
+                }}</span>
+                <span
+                  class="font-body-medium text-body-medium truncate group-hover:text-primary transition-colors"
+                  [class.text-secondary]="task.status === 'completed'"
+                  [class.line-through]="task.status === 'completed'"
+                  [class.text-on-surface]="task.status !== 'completed'"
+                  >{{ task.title }}</span
+                >
+              </div>
+              <div class="w-2/12 min-w-0 pr-4 flex items-center">
+                <span
+                  class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-label-sm text-label-sm"
+                  [ngClass]="statusChipClasses(task.status)"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full" [ngClass]="statusDotClasses(task.status)"></span>
+                  {{ statusLabel(task.status) }}
+                </span>
+              </div>
+              <div class="w-3/12 min-w-0 pr-4 flex items-center gap-2">
+                @if (task.assigned_to_username) {
+                  <div
+                    class="w-5 h-5 rounded-full bg-surface-container-high flex items-center justify-center font-label-sm text-label-sm text-on-surface flex-shrink-0"
+                  >
+                    {{ initialsOf(task.assigned_to_username) }}
+                  </div>
+                  <span class="text-on-surface truncate">{{ task.assigned_to_username }}</span>
+                } @else {
+                  <span class="text-secondary">Unassigned</span>
+                }
+              </div>
+              <div class="w-2/12 min-w-0 text-right font-secondary text-secondary">
+                {{ task.updated_at | date: 'MMM d' }}
+              </div>
+            </a>
+          }
+        </div>
       }
     }
   }
