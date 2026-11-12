@@ -83,7 +83,8 @@ Progress is tracked here as milestones complete — update the checkbox and one-
 - [x] M3 — Task domain & object-level RBAC — Task model, scoped queryset, IsTaskVisible/CanDeleteTask/CanCreateOrAssignTask; IDOR + status-only-edit verified by test and manual curl.
 - [x] M4 — Assignment + Celery notifications — TaskAssignmentEvent idempotency table, `transaction.on_commit` enqueue, console email delivered and logged against the real Celery worker + Redis broker; retry-suppression and rollback-never-enqueues verified by test.
 - [x] M5 — Redis dashboard caching — scoped stats, cache hit/invalidate verified by test, Redis-outage fallback verified live (stopped the Redis container, endpoint still returned correct scoped data).
-- [ ] M6 — Angular frontend — Material installed; feature screens (login, dashboard, tasks, users) not yet built.
+- [x] M6 — Angular frontend — all 6 screens (login, dashboard, task list/detail/create, users) built as standalone components with Angular Material; HTTP interceptor + guards wired; verified end-to-end in a real browser against the live stack as both Admin and Employee (caught and fixed a status-update response bug and an auth-guard race condition on page reload along the way).
 - [ ] M7 — Hardening, docs, submission polish
 
-**Test suite:** 24/24 passing (`pytest`) against the real Dockerized Postgres + Redis, covering every row of the brief's minimum test table.
+**Backend test suite:** 26/26 passing (`pytest`) against the real Dockerized Postgres + Redis, covering every row of the brief's minimum test table.
+**Frontend:** `ng build` and `ng test` both clean; manual browser walkthrough covered login/logout, session-expiry redirect, dashboard scoping, task create/assign/status-update, and role-based nav/route visibility for Admin and Employee.
