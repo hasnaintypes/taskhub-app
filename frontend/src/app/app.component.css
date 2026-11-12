@@ -1,0 +1,14 @@
+.brand {
+  font-weight: 600;
+  margin-right: 16px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.role-badge {
+  margin-right: 8px;
+  font-size: 0.875rem;
+  opacity: 0.9;
+}

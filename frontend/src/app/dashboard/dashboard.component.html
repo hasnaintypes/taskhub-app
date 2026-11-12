@@ -1,0 +1,59 @@
+<div class="dashboard-page">
+  <h1>Dashboard</h1>
+
+  @switch (state()) {
+    @case ('loading') {
+      <div class="centered">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    }
+    @case ('error') {
+      <mat-card class="state-card">
+        <mat-card-content>
+          <p>Something went wrong while loading your stats.</p>
+          <button mat-stroked-button (click)="load()">Retry</button>
+        </mat-card-content>
+      </mat-card>
+    }
+    @case ('ready') {
+      @if (stats() && stats()!.total_tasks === 0) {
+        <mat-card class="state-card">
+          <mat-card-content>
+            <p>No tasks yet.</p>
+          </mat-card-content>
+        </mat-card>
+      } @else {
+        <div class="stats-grid">
+          <mat-card class="stat-tile">
+            <mat-card-content>
+              <mat-icon>assignment</mat-icon>
+              <div class="stat-value">{{ stats()?.total_tasks }}</div>
+              <div class="stat-label">Total tasks</div>
+            </mat-card-content>
+          </mat-card>
+          <mat-card class="stat-tile">
+            <mat-card-content>
+              <mat-icon>check_circle</mat-icon>
+              <div class="stat-value">{{ stats()?.completed_tasks }}</div>
+              <div class="stat-label">Completed</div>
+            </mat-card-content>
+          </mat-card>
+          <mat-card class="stat-tile">
+            <mat-card-content>
+              <mat-icon>schedule</mat-icon>
+              <div class="stat-value">{{ stats()?.pending_tasks }}</div>
+              <div class="stat-label">Pending</div>
+            </mat-card-content>
+          </mat-card>
+          <mat-card class="stat-tile">
+            <mat-card-content>
+              <mat-icon>person</mat-icon>
+              <div class="stat-value">{{ stats()?.my_tasks }}</div>
+              <div class="stat-label">My tasks</div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      }
+    }
+  }
+</div>

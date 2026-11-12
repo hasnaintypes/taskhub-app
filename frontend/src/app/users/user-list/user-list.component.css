@@ -1,0 +1,34 @@
+.user-list-page {
+  padding: 24px;
+}
+
+.centered {
+  display: flex;
+  justify-content: center;
+  padding: 48px;
+}
+
+.state-card {
+  max-width: 400px;
+}
+
+.user-table {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.create-card {
+  max-width: 480px;
+}
+
+.create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.error-banner {
+  color: #b3261e;
+  font-size: 0.875rem;
+  margin: 4px 0 12px;
+}

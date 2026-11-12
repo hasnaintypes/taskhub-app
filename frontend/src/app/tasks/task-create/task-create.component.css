@@ -1,0 +1,26 @@
+.task-create-page {
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.form-card {
+  width: 100%;
+  max-width: 480px;
+}
+
+.task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.error-banner {
+  color: #b3261e;
+  font-size: 0.875rem;
+  margin: 4px 0 12px;
+}

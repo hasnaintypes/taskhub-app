@@ -1,0 +1,24 @@
+.task-list-page {
+  padding: 24px;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.centered {
+  display: flex;
+  justify-content: center;
+  padding: 48px;
+}
+
+.state-card {
+  max-width: 400px;
+}
+
+.task-table {
+  width: 100%;
+}

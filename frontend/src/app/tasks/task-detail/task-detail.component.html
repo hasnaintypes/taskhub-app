@@ -1,0 +1,98 @@
+<div class="task-detail-page">
+  @switch (state()) {
+    @case ('loading') {
+      <div class="centered">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    }
+    @case ('not-found') {
+      <mat-card class="state-card">
+        <mat-card-content>
+          <p>This task does not exist, or you do not have access to it.</p>
+        </mat-card-content>
+      </mat-card>
+    }
+    @case ('error') {
+      <mat-card class="state-card">
+        <mat-card-content>
+          <p>Could not load this task.</p>
+        </mat-card-content>
+      </mat-card>
+    }
+    @case ('ready') {
+      <mat-card class="detail-card">
+        <mat-card-header>
+          <mat-card-title>{{ task()?.title }}</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          @if (errorMessage()) {
+            <p class="error-banner" role="alert">{{ errorMessage() }}</p>
+          }
+
+          @if (authService.canManageTasks()) {
+            <!-- Admin/Manager: full field edit -->
+            <form [formGroup]="editForm" (ngSubmit)="saveFields()" class="task-form">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Title</mat-label>
+                <input matInput formControlName="title" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Description</mat-label>
+                <textarea matInput formControlName="description" rows="4"></textarea>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Status</mat-label>
+                <mat-select formControlName="status">
+                  @for (option of statusOptions; track option) {
+                    <mat-option [value]="option">{{ option }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <button mat-flat-button color="primary" type="submit" [disabled]="saving()">
+                Save changes
+              </button>
+            </form>
+
+            <mat-divider class="section-divider"></mat-divider>
+
+            <h3>Assign</h3>
+            <form [formGroup]="assignForm" (ngSubmit)="assign()" class="task-form">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Assign to</mat-label>
+                <mat-select formControlName="assigned_to">
+                  @for (user of users(); track user.id) {
+                    <mat-option [value]="user.id">{{ user.username }} ({{ user.role }})</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <button mat-stroked-button type="submit" [disabled]="assigning()">
+                Assign
+              </button>
+            </form>
+          } @else {
+            <!-- Employee: status-only -->
+            <p>{{ task()?.description }}</p>
+
+            <form [formGroup]="statusForm" (ngSubmit)="saveStatus()" class="task-form">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Status</mat-label>
+                <mat-select formControlName="status">
+                  @for (option of statusOptions; track option) {
+                    <mat-option [value]="option">{{ option }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <button mat-flat-button color="primary" type="submit" [disabled]="saving()">
+                Update status
+              </button>
+            </form>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+  }
+</div>
