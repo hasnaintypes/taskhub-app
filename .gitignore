@@ -1,0 +1,33 @@
+# --- Confidential assessment & internal planning docs (DO NOT TRACK) ---
+docs/ASSESSMENT.md
+docs/REQUIREMENTS.md
+docs/PRD.md
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+*.sqlite3
+.pytest_cache/
+.coverage
+htmlcov/
+
+# --- Node / Angular ---
+node_modules/
+dist/
+.angular/
+
+# --- Env & secrets ---
+.env
+.env.*
+!.env.example
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+.DS_Store
+
+# --- Docker ---
+*.log
