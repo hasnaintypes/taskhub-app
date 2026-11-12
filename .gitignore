@@ -3,6 +3,9 @@ docs/ASSESSMENT.md
 docs/REQUIREMENTS.md
 docs/PRD.md
 
+# --- UI redesign reference material (local only) ---
+design/
+
 # --- Python ---
 __pycache__/
 *.py[cod]
