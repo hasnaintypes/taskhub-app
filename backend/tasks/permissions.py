@@ -4,29 +4,18 @@ from accounts.models import Role
 
 
 class IsTaskVisible(BasePermission):
-    """Object-level visibility [RBAC-04/05/10]: Admin/Manager see all tasks;
-    an Employee may only see a task assigned to them. Prevents IDOR."""
+    """Object-level visibility AND write-access guard [RBAC-04/05/06/10]:
+    Admin/Manager may view or write any task; an Employee may only view or
+    write a task assigned to them. Used for GET, PATCH and DELETE alike —
+    prevents IDOR on reads and unauthorized writes alike.
 
-    message = "You do not have access to this task."
-
-    def has_object_permission(self, request, view, obj) -> bool:
-        user = request.user
-        if user.role in (Role.ADMIN, Role.MANAGER):
-            return True
-        return obj.assigned_to_id == user.id
-
-
-class CanEditTaskFields(BasePermission):
-    """Write-side guard for PATCH /api/tasks/{id}/ [RBAC-06, RBAC-A1].
-
-    Admin/Manager may edit any field on any task. The assignee may only
-    reach this view to change `status` — the serializer selection in the
-    view (TaskStatusUpdateSerializer vs TaskSerializer) is what actually
-    restricts *which* fields are writable; this permission only confirms
-    the requester is allowed to write to the object at all.
+    For PATCH specifically, this only confirms the requester may touch the
+    object at all; *which* fields are writable is additionally restricted
+    by the view's serializer selection (`TaskStatusUpdateSerializer` for an
+    Employee vs. the full `TaskSerializer` for Admin/Manager) [RBAC-A1].
     """
 
-    message = "You cannot modify this task."
+    message = "You do not have access to this task."
 
     def has_object_permission(self, request, view, obj) -> bool:
         user = request.user

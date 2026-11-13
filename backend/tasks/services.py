@@ -2,7 +2,7 @@ from django.db import transaction
 from django.db.models import QuerySet
 
 from accounts.models import Role, User
-from dashboard.services import invalidate_for_user
+from dashboard.services import invalidate_for_admins_and_managers, invalidate_for_user
 from notifications.tasks import send_assignment_email
 
 from .models import Task, TaskAssignmentEvent
@@ -17,9 +17,12 @@ def scoped_queryset_for_user(user: User) -> QuerySet[Task]:
 
 
 def _invalidate_dashboard_for(*user_ids: int | None) -> None:
+    # Any task mutation also changes every Admin/Manager's "all tasks"
+    # aggregate, not just the directly-affected user_ids' scope [CACHE-04].
     for user_id in user_ids:
         if user_id is not None:
             invalidate_for_user(user_id)
+    invalidate_for_admins_and_managers()
 
 
 def create_task(*, created_by: User, validated_data: dict) -> Task:

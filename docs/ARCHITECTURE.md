@@ -43,10 +43,9 @@ Two origins in dev (`localhost:4200` Angular, `localhost:8000` Django) → CORS 
 
 **Permission classes (`tasks/permissions.py`):**
 - `IsAdmin`, `IsAdminOrManager` — role checks.
-- `IsTaskVisible` (object-level `has_object_permission`): Admin/Manager → True always; Employee → `task.assigned_to_id == request.user.id`.
-- `CanEditTaskFields`: Admin/Manager → full edit; assignee → `status` field only (view enforces via serializer field restriction, not just permission class) [RBAC-A1].
+- `IsTaskVisible` (object-level `has_object_permission`): Admin/Manager → True always; Employee → `task.assigned_to_id == request.user.id`. Used for GET, PATCH and DELETE alike — it's both the IDOR guard on reads and the write-access guard, with *which* fields are writable on PATCH additionally restricted by serializer selection (`TaskStatusUpdateSerializer` for an Employee vs. full `TaskSerializer` for Admin/Manager) [RBAC-A1].
 - `CanDeleteTask`: Admin only.
-- `CanAssignTask`: Admin/Manager only.
+- `CanCreateOrAssignTask`: Admin/Manager only.
 
 Every view combines `IsAuthenticated` + the relevant class(es); list endpoints additionally filter the queryset by role (never rely on serialization-time hiding).
 
@@ -149,7 +148,7 @@ flowchart TD
 
 - Cache key always includes `user.id` (not just role) → no cross-user leakage even within the same role [CACHE-05].
 - Authorization/role is re-resolved from the live DB user object on every request *before* the cache lookup — a cache hit never bypasses a live permission check, so a revoked/changed role takes effect immediately [CACHE-06].
-- Invalidation (`cache.delete`) triggered from the `tasks` app's service layer right after create/update/assign/delete commit — not from signals, to keep the write path explicit and testable — invalidating the acting user's key plus the affected assignee's key (previous + new on reassignment) plus Admin/Manager "all tasks" keys are irrelevant since Admin/Manager queries are per-requesting-user anyway (no shared aggregate key) [CACHE-04].
+- Invalidation (`cache.delete`) triggered from the `tasks` app's service layer right after create/update/assign/delete commit — not from signals, to keep the write path explicit and testable. Every mutation invalidates: the acting user's key, the directly-affected assignee's key (previous + new on reassignment), and — because every Admin/Manager has their *own* per-user cache key caching the same "all tasks" aggregate (CACHE-05 means there's no single shared aggregate key to invalidate once) — every Admin/Manager's key, via `invalidate_for_admins_and_managers()` [CACHE-04]. An earlier version of this service only invalidated the directly-affected users, which left *other*, uninvolved Admins/Managers viewing stale totals for up to the TTL; this is now covered by a regression test (`test_task_mutation_invalidates_every_admin_and_managers_cache`).
 - Redis exceptions caught at the cache-service boundary → fallback path `F` (direct scoped DB query), never a 500, never stale/wrong-scope data [CACHE-07].
 
 ## 7. Repository structure

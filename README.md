@@ -4,8 +4,9 @@ A multi-user task management system demonstrating secure session-based authentic
 backend-enforced role-based access control, Redis-backed dashboard caching, and
 asynchronous email notifications via Celery.
 
-**Stack:** Django 5 + Django REST Framework · Angular 19 (standalone components, Angular
-Material) · PostgreSQL 16 · Redis 7 · Celery 5 · Docker Compose.
+**Stack:** Django 5 + Django REST Framework · Angular 19 (standalone components, custom
+Tailwind-based Material 3 design system — not the `@angular/material` library) ·
+PostgreSQL 16 · Redis 7 · Celery 5 · Docker Compose.
 
 See `docs/ARCHITECTURE.md` for the system design (diagrams, data model, auth/CSRF flow,
 caching and notification flows) and `docs/PLAN.md` for the milestone-by-milestone build log.
@@ -40,8 +41,9 @@ All seeded accounts use the password `DemoPass123!` — usernames are `admin`, `
 
 ## Running tests
 
-Backend (26 tests — covers every row of the assessment's minimum test table: auth,
-CSRF, RBAC, IDOR, cache hit/invalidation/outage-fallback, and Celery idempotency):
+Backend (27 tests — covers every row of the assessment's minimum test table: auth,
+CSRF, RBAC, IDOR, cache hit/invalidation/outage-fallback (including cross-admin/manager
+invalidation), and Celery idempotency):
 
 ```bash
 docker compose exec backend pytest -v
@@ -71,8 +73,11 @@ development — see `docs/PLAN.md` for the verification log per milestone.
   enforced in DRF permission classes on the backend; Angular route guards are a UX
   convenience only and are never the security boundary.
 - **Caching**: `GET /api/dashboard/stats/` is cached per-user-id in Redis with a 300s TTL.
-  A Redis outage falls back straight to a scoped DB query rather than failing the request.
-  See `docs/ARCHITECTURE.md` §6.
+  Because each Admin/Manager has their own cache key for the same "all tasks" aggregate,
+  every task mutation invalidates not just the directly-affected users but every
+  Admin/Manager's key, so a second Admin/Manager never sees stale totals. A Redis outage
+  falls back straight to a scoped DB query rather than failing the request. See
+  `docs/ARCHITECTURE.md` §6.
 - **Notifications**: assigning a task creates a `TaskAssignmentEvent` row in the same
   transaction as the assignment, and the Celery job is enqueued only via
   `transaction.on_commit` — so a rolled-back assignment never sends a notification. A
@@ -106,8 +111,8 @@ outside this repository). The load-bearing ones:
 
 - No password reset, email verification, or rate limiting on login — not required by the
   assessment brief; noted as optional hardening.
-- No task due dates, priority, filtering/search UI, or pagination UI beyond the API's
-  default page size (25) — out of scope per the brief's explicit priority on
-  correctness/security over feature breadth.
+- No task due dates, priority, or filtering/search UI — out of scope per the brief's
+  explicit priority on correctness/security over feature breadth. (Task/user lists do
+  paginate through the API's full result set via Previous/Next controls.)
 - The Angular UI is functional but not visually polished, consistent with the brief's
   explicit statement that "production-level visual polish is not required."

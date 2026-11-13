@@ -100,6 +100,32 @@ class TestTaskRBAC:
         assert response.status_code == 200
         assert cache.get(_cache_key(employee_user.id)) is None  # invalidated by the edit
 
+    def test_task_mutation_invalidates_every_admin_and_managers_cache(
+        self, login, admin_user, manager_user, task_assigned_to_employee, django_capture_on_commit_callbacks
+    ):
+        """Regression test: a mutation by one Admin must also invalidate a
+        *different, uninvolved* Manager's cached "all tasks" aggregate —
+        each Admin/Manager has their own per-user cache key (CACHE-05), so
+        all of them need invalidating together, not just the acting user
+        and the directly-affected assignee/creator [CACHE-04]."""
+        from dashboard.services import _cache_key, get_dashboard_stats
+
+        get_dashboard_stats(manager_user)  # warm the bystander Manager's cache
+        from django.core.cache import cache
+
+        assert cache.get(_cache_key(manager_user.id)) is not None
+
+        client, csrf_token = login("admin")
+        with django_capture_on_commit_callbacks(execute=True):
+            response = client.post(
+                "/api/tasks/", {"title": "New unassigned task"}, format="json", HTTP_X_CSRFTOKEN=csrf_token
+            )
+        assert response.status_code == 201
+
+        # The bystander Manager never touched this task, but their cached
+        # "all tasks" total is now stale and must have been invalidated.
+        assert cache.get(_cache_key(manager_user.id)) is None
+
     def test_admin_can_delete_task(self, login, admin_user, task_assigned_to_employee):
         client, csrf_token = login("admin")
         response = client.delete(
