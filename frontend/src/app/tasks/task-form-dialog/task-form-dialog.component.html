@@ -1,0 +1,91 @@
+<div
+  class="fixed inset-0 bg-inverse-surface/20 z-50 flex items-center justify-center p-4"
+  (click)="close()"
+>
+  <div
+    class="bg-surface-container-lowest rounded-lg max-w-lg w-full p-5 shadow-xl flex flex-col gap-4"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="mode === 'edit' ? 'Edit task' : 'Create new task'"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-[20px]">{{ mode === 'edit' ? 'edit' : 'add_task' }}</span>
+        <h3 class="font-headline-sm text-headline-sm text-on-surface">{{ mode === 'edit' ? 'Edit task' : 'Create new task' }}</h3>
+      </div>
+      <button
+        type="button"
+        aria-label="Close dialog"
+        (click)="close()"
+        class="text-secondary hover:text-on-surface transition-colors p-1 rounded hover:bg-surface-container"
+      >
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-3">
+      <div class="flex flex-col gap-1">
+        <label class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Title</label>
+        <input
+          #titleInput
+          formControlName="title"
+          type="text"
+          placeholder="e.g. Audit permission matrix"
+          class="h-9 px-2.5 text-[13px] bg-surface-container-low rounded focus:outline-none focus:ring-1 focus:ring-primary-container text-on-surface placeholder:text-secondary/60"
+        />
+        @if (form.controls.title.touched && form.controls.title.invalid) {
+          <span class="text-error font-label-sm text-label-sm">Title is required.</span>
+        }
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Description</label>
+        <textarea
+          formControlName="description"
+          rows="4"
+          class="px-2.5 py-2 text-[13px] bg-surface-container-low rounded focus:outline-none focus:ring-1 focus:ring-primary-container text-on-surface placeholder:text-secondary/60 resize-none"
+        ></textarea>
+      </div>
+
+      @if (mode === 'create') {
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Assign to</label>
+          <select
+            formControlName="assigned_to"
+            class="h-9 px-2 text-[13px] rounded bg-surface-container-low text-on-surface focus:outline-none focus:ring-1 focus:ring-primary-container"
+          >
+            <option [ngValue]="null">Unassigned</option>
+            @for (user of users; track user.id) {
+              <option [ngValue]="user.id">{{ user.username }} ({{ user.role }})</option>
+            }
+          </select>
+        </div>
+      }
+
+      @if (errorMessage()) {
+        <p class="text-error font-body-default text-body-default" role="alert">{{ errorMessage() }}</p>
+      }
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button
+          type="button"
+          (click)="close()"
+          class="px-3 py-1.5 rounded text-[13px] font-medium text-secondary hover:bg-surface-container hover:text-on-surface transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          [disabled]="submitting()"
+          class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[6px] text-[13px] font-medium text-on-primary hover:opacity-90 transition-opacity bg-on-surface disabled:opacity-60"
+        >
+          @if (submitting()) {
+            <span class="w-3.5 h-3.5 border-2 border-surface-container-lowest/40 border-t-surface-container-lowest rounded-full animate-spin"></span>
+          }
+          {{ mode === 'edit' ? 'Save changes' : 'Create task' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

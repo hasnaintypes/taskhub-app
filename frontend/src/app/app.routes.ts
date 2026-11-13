@@ -21,8 +21,8 @@ export const routes: Routes = [
   {
     path: 'tasks/new',
     canActivate: [authGuard, roleGuard(['ADMIN', 'MANAGER'])],
-    loadComponent: () =>
-      import('./tasks/task-create/task-create.component').then((m) => m.TaskCreateComponent),
+    data: { openCreateDialog: true },
+    loadComponent: () => import('./tasks/task-list/task-list.component').then((m) => m.TaskListComponent),
   },
   {
     path: 'tasks/:id',

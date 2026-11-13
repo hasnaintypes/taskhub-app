@@ -6,7 +6,7 @@
     </div>
     @if (authService.canManageTasks()) {
       <button
-        routerLink="/tasks/new"
+        (click)="openCreateDialog()"
         class="inline-flex items-center gap-1.5 text-on-primary font-body-medium text-body-medium px-3.5 py-1.5 rounded-[6px] hover:opacity-90 active:scale-[0.99] transition-all bg-on-surface"
         type="button"
       >
@@ -35,8 +35,18 @@
     }
     @case ('ready') {
       @if (tasks().length === 0) {
-        <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] p-4 shadow-sm max-w-sm">
+        <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] p-6 shadow-sm max-w-sm flex flex-col items-start gap-3">
           <p class="font-body-default text-body-default text-secondary">No tasks assigned to you yet.</p>
+          @if (authService.canManageTasks()) {
+            <button
+              (click)="openCreateDialog()"
+              type="button"
+              class="inline-flex items-center gap-1.5 text-on-primary font-body-medium text-body-medium px-3 py-1.5 rounded-[6px] hover:opacity-90 active:scale-[0.99] transition-all bg-on-surface"
+            >
+              <span class="material-symbols-outlined text-[15px] leading-none">add</span>
+              <span>New Task</span>
+            </button>
+          }
         </div>
       } @else {
         <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] overflow-hidden shadow-sm">
@@ -91,7 +101,38 @@
             </a>
           }
         </div>
+
+        @if (response()?.next || response()?.previous) {
+          <div class="flex items-center justify-between pt-3">
+            <p class="font-body-default text-body-default text-secondary">
+              {{ tasks().length }} of {{ response()?.count }} tasks
+            </p>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                (click)="previousPage()"
+                [disabled]="!response()?.previous"
+                class="px-3 py-1.5 rounded text-[13px] font-medium text-on-surface border border-surface-container-high hover:bg-surface-container transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                (click)="nextPage()"
+                [disabled]="!response()?.next"
+                class="px-3 py-1.5 rounded text-[13px] font-medium text-on-surface border border-surface-container-high hover:bg-surface-container transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        }
       }
     }
   }
 </div>
+
+@if (dialogOpen()) {
+  <app-task-form-dialog mode="create" [users]="users()" (closed)="closeDialog()" (saved)="onTaskCreated($event)" />
+}
+

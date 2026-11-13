@@ -1,4 +1,4 @@
-<div class="flex flex-col w-full max-w-lg">
+<div class="flex flex-col w-full max-w-4xl">
   @switch (state()) {
     @case ('loading') {
       <div class="flex justify-center py-16">
@@ -6,58 +6,66 @@
       </div>
     }
     @case ('not-found') {
-      <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] p-4 shadow-sm">
+      <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] p-4 shadow-sm max-w-sm">
         <p class="font-body-default text-body-default text-secondary">
           This task does not exist, or you do not have access to it.
         </p>
       </div>
     }
     @case ('error') {
-      <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] p-4 shadow-sm">
+      <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] p-4 shadow-sm max-w-sm">
         <p class="font-body-default text-body-default text-secondary">Could not load this task.</p>
       </div>
     }
     @case ('ready') {
       <header class="flex items-center gap-2 pb-4">
-        <a routerLink="/tasks" class="text-secondary hover:text-on-surface transition-colors">
+        <a
+          routerLink="/tasks"
+          aria-label="Back to tasks"
+          class="text-secondary hover:text-on-surface transition-colors p-1 -ml-1 rounded hover:bg-surface-container flex-shrink-0"
+        >
           <span class="material-symbols-outlined text-[18px]">arrow_back</span>
         </a>
         <h1 class="font-headline-md text-headline-md text-on-surface truncate">{{ task()?.title }}</h1>
+        <span
+          class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-label-sm text-label-sm flex-shrink-0"
+          [ngClass]="statusChipClasses(task()!.status)"
+        >
+          <span class="w-1.5 h-1.5 rounded-full" [ngClass]="statusDotClasses(task()!.status)"></span>
+          {{ statusLabel(task()!.status) }}
+        </span>
+        <div class="flex-1"></div>
+        @if (authService.canManageTasks()) {
+          <button
+            type="button"
+            (click)="openEditDialog()"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded text-[13px] font-medium text-secondary hover:bg-surface-container hover:text-on-surface transition-colors flex-shrink-0"
+          >
+            <span class="material-symbols-outlined text-[16px]">edit</span>
+            <span>Edit</span>
+          </button>
+        }
       </header>
 
-      <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] p-5 shadow-sm flex flex-col gap-4">
-        @if (errorMessage()) {
-          <p class="text-error font-body-default text-body-default" role="alert">{{ errorMessage() }}</p>
-        }
-        @if (successMessage()) {
-          <p class="text-primary font-body-default text-body-default">{{ successMessage() }}</p>
-        }
+      <div class="flex flex-col lg:flex-row gap-4">
+        <div class="flex-1 min-w-0 bg-surface-container-lowest border border-surface-container-high rounded-[6px] p-5 shadow-sm">
+          <h2 class="font-label-sm text-label-sm text-secondary uppercase tracking-wider mb-2">Description</h2>
+          @if (task()?.description) {
+            <p class="font-body-default text-body-default text-on-surface whitespace-pre-wrap">{{ task()?.description }}</p>
+          } @else {
+            <p class="font-body-default text-body-default text-secondary italic">No description provided.</p>
+          }
+        </div>
 
-        @if (authService.canManageTasks()) {
-          <form [formGroup]="editForm" (ngSubmit)="saveFields()" class="flex flex-col gap-3">
-            <div class="flex flex-col gap-1">
-              <label class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Title</label>
-              <input
-                formControlName="title"
-                type="text"
-                class="h-9 px-2.5 text-[13px] bg-surface-container-low rounded focus:outline-none focus:ring-1 focus:ring-primary-container text-on-surface"
-              />
-            </div>
-
-            <div class="flex flex-col gap-1">
-              <label class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Description</label>
-              <textarea
-                formControlName="description"
-                rows="4"
-                class="px-2.5 py-2 text-[13px] bg-surface-container-low rounded focus:outline-none focus:ring-1 focus:ring-primary-container text-on-surface resize-none"
-              ></textarea>
-            </div>
-
+        <div class="w-full lg:w-72 flex-shrink-0 flex flex-col gap-4">
+          <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] p-4 shadow-sm flex flex-col gap-4">
             <div class="flex flex-col gap-1">
               <label class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Status</label>
               <select
-                formControlName="status"
-                class="h-9 px-2 text-[13px] rounded bg-surface-container-low text-on-surface focus:outline-none focus:ring-1 focus:ring-primary-container"
+                [formControl]="statusForm.controls.status"
+                (change)="saveStatus()"
+                [disabled]="savingStatus()"
+                class="h-9 px-2 text-[13px] rounded bg-surface-container-low text-on-surface focus:outline-none focus:ring-1 focus:ring-primary-container disabled:opacity-60"
               >
                 @for (option of statusOptions; track option) {
                   <option [value]="option">{{ statusLabel(option) }}</option>
@@ -65,64 +73,75 @@
               </select>
             </div>
 
-            <button
-              type="submit"
-              [disabled]="saving()"
-              class="self-start px-3.5 py-1.5 rounded-[6px] text-[13px] font-medium text-on-primary hover:opacity-90 transition-opacity bg-on-surface disabled:opacity-60"
-            >
-              Save changes
-            </button>
-          </form>
-
-          <div class="border-t border-surface-container-high pt-4 flex flex-col gap-3">
-            <h3 class="font-headline-sm text-headline-sm text-on-surface">Assign</h3>
-            <form [formGroup]="assignForm" (ngSubmit)="assign()" class="flex items-end gap-2">
-              <div class="flex flex-col gap-1 flex-1">
-                <label class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Assign to</label>
+            <div class="flex flex-col gap-1">
+              <label class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Assignee</label>
+              @if (authService.canManageTasks()) {
                 <select
-                  formControlName="assigned_to"
-                  class="h-9 px-2 text-[13px] rounded bg-surface-container-low text-on-surface focus:outline-none focus:ring-1 focus:ring-primary-container"
+                  [formControl]="assignForm.controls.assigned_to"
+                  (change)="assign()"
+                  [disabled]="assigning()"
+                  class="h-9 px-2 text-[13px] rounded bg-surface-container-low text-on-surface focus:outline-none focus:ring-1 focus:ring-primary-container disabled:opacity-60"
                 >
-                  <option [ngValue]="null">Select a user</option>
+                  <option [ngValue]="null">Unassigned</option>
                   @for (user of users(); track user.id) {
                     <option [ngValue]="user.id">{{ user.username }} ({{ user.role }})</option>
                   }
                 </select>
-              </div>
-              <button
-                type="submit"
-                [disabled]="assigning()"
-                class="h-9 px-3.5 rounded-[6px] text-[13px] font-medium text-on-surface border border-surface-container-high hover:bg-surface-container transition-colors disabled:opacity-60"
-              >
-                Assign
-              </button>
-            </form>
-          </div>
-        } @else {
-          <p class="font-body-default text-body-default text-on-surface">{{ task()?.description }}</p>
-
-          <form [formGroup]="statusForm" (ngSubmit)="saveStatus()" class="flex flex-col gap-3 border-t border-surface-container-high pt-4">
-            <div class="flex flex-col gap-1">
-              <label class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Status</label>
-              <select
-                formControlName="status"
-                class="h-9 px-2 text-[13px] rounded bg-surface-container-low text-on-surface focus:outline-none focus:ring-1 focus:ring-primary-container"
-              >
-                @for (option of statusOptions; track option) {
-                  <option [value]="option">{{ statusLabel(option) }}</option>
-                }
-              </select>
+              } @else if (task()?.assigned_to_username) {
+                <div class="flex items-center gap-2 h-9">
+                  <div
+                    class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center font-label-sm text-label-sm text-on-surface flex-shrink-0"
+                  >
+                    {{ initialsOf(task()?.assigned_to_username) }}
+                  </div>
+                  <span class="font-body-default text-body-default text-on-surface truncate">{{ task()?.assigned_to_username }}</span>
+                </div>
+              } @else {
+                <span class="font-body-default text-body-default text-secondary h-9 flex items-center">Unassigned</span>
+              }
             </div>
+
+            <div class="border-t border-surface-container-high pt-3 flex flex-col gap-2 font-body-default text-body-default text-secondary">
+              <div class="flex items-center justify-between">
+                <span>Created</span>
+                <span class="text-on-surface">{{ task()?.created_at | date: 'MMM d, y' }}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span>Updated</span>
+                <span class="text-on-surface">{{ task()?.updated_at | date: 'MMM d, y' }}</span>
+              </div>
+            </div>
+          </div>
+
+          @if (authService.canManageTasks()) {
             <button
-              type="submit"
-              [disabled]="saving()"
-              class="self-start px-3.5 py-1.5 rounded-[6px] text-[13px] font-medium text-on-primary hover:opacity-90 transition-opacity bg-on-surface disabled:opacity-60"
+              type="button"
+              (click)="openDeleteDialog()"
+              [disabled]="deleting()"
+              class="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-[6px] text-[13px] font-medium text-error border border-error-container hover:bg-error-container/40 transition-colors disabled:opacity-60"
             >
-              Update status
+              <span class="material-symbols-outlined text-[16px]">delete</span>
+              <span>Delete task</span>
             </button>
-          </form>
-        }
+          }
+        </div>
       </div>
     }
   }
 </div>
+
+@if (editDialogOpen()) {
+  <app-task-form-dialog mode="edit" [task]="task()" (closed)="closeEditDialog()" (saved)="onTaskEdited($event)" />
+}
+
+@if (deleteDialogOpen()) {
+  <app-confirm-dialog
+    title="Delete this task?"
+    [message]="'“' + task()?.title + '” will be permanently deleted. This cannot be undone.'"
+    confirmLabel="Delete task"
+    [destructive]="true"
+    [confirming]="deleting()"
+    (closed)="closeDeleteDialog()"
+    (confirmed)="deleteTask()"
+  />
+}
