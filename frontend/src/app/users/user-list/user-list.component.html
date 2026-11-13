@@ -40,24 +40,27 @@
         </div>
       } @else {
         <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] overflow-hidden shadow-sm">
-          <div class="bg-surface-container-low px-4 py-2.5 flex items-center text-secondary font-label-sm text-label-sm uppercase tracking-wider select-none">
+          <div class="bg-surface-container-low px-4 py-2.5 hidden sm:flex items-center text-secondary font-label-sm text-label-sm uppercase tracking-wider select-none">
             <div class="w-6/12 min-w-0 pr-4">User</div>
             <div class="w-4/12 min-w-0 pr-4">Email</div>
             <div class="w-2/12 min-w-0 text-right">Role</div>
           </div>
 
           @for (user of users(); track user.id) {
-            <div class="px-4 py-3 flex items-center font-body-default text-body-default border-t border-surface-container-high">
-              <div class="w-6/12 min-w-0 pr-4 flex items-center gap-2.5">
+            <div class="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-1 font-body-default text-body-default border-t border-surface-container-high">
+              <div class="flex items-center gap-2.5 min-w-0 sm:w-6/12 sm:pr-4">
                 <div
                   class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center font-label-sm text-label-sm text-on-surface flex-shrink-0"
                 >
                   {{ initialsOf(user.username) }}
                 </div>
                 <span class="font-body-medium text-body-medium text-on-surface truncate">{{ user.username }}</span>
+                <span class="sm:hidden ml-auto px-1.5 py-0.5 bg-surface-container text-secondary font-label-sm text-label-sm rounded flex-shrink-0">{{
+                  user.role
+                }}</span>
               </div>
-              <div class="w-4/12 min-w-0 pr-4 text-secondary truncate">{{ user.email }}</div>
-              <div class="w-2/12 min-w-0 text-right">
+              <div class="min-w-0 pl-[34px] sm:pl-0 sm:w-4/12 sm:pr-4 text-secondary truncate">{{ user.email }}</div>
+              <div class="hidden sm:block sm:w-2/12 min-w-0 text-right">
                 <span class="px-1.5 py-0.5 bg-surface-container text-secondary font-label-sm text-label-sm rounded">{{
                   user.role
                 }}</span>

@@ -50,7 +50,7 @@
         </div>
       } @else {
         <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] overflow-hidden shadow-sm">
-          <div class="bg-surface-container-low px-4 py-2.5 flex items-center text-secondary font-label-sm text-label-sm uppercase tracking-wider select-none">
+          <div class="bg-surface-container-low px-4 py-2.5 hidden sm:flex items-center text-secondary font-label-sm text-label-sm uppercase tracking-wider select-none">
             <div class="w-5/12 min-w-0 pr-4">Task</div>
             <div class="w-2/12 min-w-0 pr-4">Status</div>
             <div class="w-3/12 min-w-0 pr-4">Assigned To</div>
@@ -60,9 +60,9 @@
           @for (task of tasks(); track task.id) {
             <a
               [routerLink]="['/tasks', task.id]"
-              class="px-4 py-3 flex items-center font-body-default text-body-default hover:bg-surface-container-low/50 transition-colors group cursor-pointer border-t border-surface-container-high"
+              class="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-2 font-body-default text-body-default hover:bg-surface-container-low/50 transition-colors group cursor-pointer border-t border-surface-container-high"
             >
-              <div class="w-5/12 min-w-0 pr-4 flex items-center gap-2.5">
+              <div class="flex items-center gap-2.5 min-w-0 sm:w-5/12 sm:pr-4">
                 <span class="material-symbols-outlined text-[16px] text-secondary flex-shrink-0">{{
                   task.status === 'completed' ? 'check_circle' : 'radio_button_unchecked'
                 }}</span>
@@ -74,7 +74,20 @@
                   >{{ task.title }}</span
                 >
               </div>
-              <div class="w-2/12 min-w-0 pr-4 flex items-center">
+
+              <div class="flex sm:hidden items-center gap-3 flex-wrap pl-[26px] text-secondary">
+                <span
+                  class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-label-sm text-label-sm"
+                  [ngClass]="statusChipClasses(task.status)"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full" [ngClass]="statusDotClasses(task.status)"></span>
+                  {{ statusLabel(task.status) }}
+                </span>
+                <span class="truncate">{{ task.assigned_to_username || 'Unassigned' }}</span>
+                <span class="font-secondary text-secondary">{{ task.updated_at | date: 'MMM d' }}</span>
+              </div>
+
+              <div class="hidden sm:flex sm:w-2/12 min-w-0 sm:pr-4 items-center">
                 <span
                   class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-label-sm text-label-sm"
                   [ngClass]="statusChipClasses(task.status)"
@@ -83,7 +96,7 @@
                   {{ statusLabel(task.status) }}
                 </span>
               </div>
-              <div class="w-3/12 min-w-0 pr-4 flex items-center gap-2">
+              <div class="hidden sm:flex sm:w-3/12 min-w-0 sm:pr-4 items-center gap-2">
                 @if (task.assigned_to_username) {
                   <div
                     class="w-5 h-5 rounded-full bg-surface-container-high flex items-center justify-center font-label-sm text-label-sm text-on-surface flex-shrink-0"
@@ -95,7 +108,7 @@
                   <span class="text-secondary">Unassigned</span>
                 }
               </div>
-              <div class="w-2/12 min-w-0 text-right font-secondary text-secondary">
+              <div class="hidden sm:block sm:w-2/12 min-w-0 text-right font-secondary text-secondary">
                 {{ task.updated_at | date: 'MMM d' }}
               </div>
             </a>
