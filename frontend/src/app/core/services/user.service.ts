@@ -21,8 +21,10 @@ export class UserService {
 
   constructor(private readonly http: HttpClient) {}
 
-  list(): Observable<PaginatedResponse<User>> {
-    return this.http.get<PaginatedResponse<User>>(`${this.baseUrl}/`);
+  /** Pass a `next`/`previous` URL from a prior response to page through
+   * results; omit it to fetch the first page. */
+  list(url?: string): Observable<PaginatedResponse<User>> {
+    return this.http.get<PaginatedResponse<User>>(url ?? `${this.baseUrl}/`);
   }
 
   create(payload: CreateUserPayload): Observable<User> {

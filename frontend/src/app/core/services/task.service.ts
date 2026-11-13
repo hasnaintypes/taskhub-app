@@ -12,8 +12,10 @@ export class TaskService {
 
   constructor(private readonly http: HttpClient) {}
 
-  list(): Observable<PaginatedResponse<Task>> {
-    return this.http.get<PaginatedResponse<Task>>(`${this.baseUrl}/`);
+  /** Pass a `next`/`previous` URL from a prior response to page through
+   * results; omit it to fetch the first page. */
+  list(url?: string): Observable<PaginatedResponse<Task>> {
+    return this.http.get<PaginatedResponse<Task>>(url ?? `${this.baseUrl}/`);
   }
 
   get(id: number): Observable<Task> {
