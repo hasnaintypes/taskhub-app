@@ -14,11 +14,11 @@ flowchart LR
         C[(Sessions/CSRF)]
     end
     D[(PostgreSQL)]
-    E[(Redis\ncache + broker)]
+    E[("Redis<br/>cache + broker")]
     F[Celery Worker]
     G[Console Email Backend]
 
-    A <-- "cookies + X-CSRFToken\nwithCredentials" --> B
+    A <-- "cookies + X-CSRFToken<br/>withCredentials" --> B
     B --> C
     B <--> D
     B <--> E
@@ -140,7 +140,7 @@ flowchart TD
     A[GET /api/dashboard/stats/] --> B{Authenticated & role resolved fresh}
     B -->|no| Z[401]
     B -->|yes| C{Redis reachable?}
-    C -->|yes| D{"cache key\ndashboard:stats:v1:user:<id>\nexists?"}
+    C -->|yes| D{"cache key<br/>dashboard:stats:v1:user:ID<br/>exists?"}
     D -->|hit| E[Return cached JSON]
     D -->|miss| F[Compute scoped query] --> G[SET key TTL=300s] --> E
     C -->|no / error| F
