@@ -4,122 +4,98 @@
       <h1 class="font-headline-lg text-headline-lg text-on-surface">Users</h1>
       <p class="font-body-default text-body-default text-secondary mt-1">Everyone with access to this workspace.</p>
     </div>
+    @if (authService.isAdmin()) {
+      <button
+        (click)="openCreateDialog()"
+        class="inline-flex items-center gap-1.5 text-on-primary font-body-medium text-body-medium px-3.5 py-1.5 rounded-[6px] hover:opacity-90 active:scale-[0.99] transition-all bg-on-surface"
+        type="button"
+      >
+        <span class="material-symbols-outlined text-[15px] leading-none">add</span>
+        <span>Create user</span>
+      </button>
+    }
   </header>
 
-  <div class="flex flex-col lg:flex-row gap-6">
-    <div class="flex-1 min-w-0">
-      @switch (state()) {
-        @case ('loading') {
-          <div class="flex justify-center py-16">
-            <span class="w-6 h-6 border-2 border-surface-container-high border-t-on-surface rounded-full animate-spin"></span>
-          </div>
-        }
-        @case ('error') {
-          <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] p-4 shadow-sm max-w-sm">
-            <p class="font-body-default text-body-default text-secondary mb-2">Could not load users.</p>
-            <button
-              (click)="load()"
-              class="px-3 py-1.5 rounded text-[13px] font-medium text-on-surface border border-surface-container-high hover:bg-surface-container transition-colors"
-            >
-              Retry
-            </button>
-          </div>
-        }
-        @case ('ready') {
-          @if (users().length === 0) {
-            <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] p-4 shadow-sm max-w-sm">
-              <p class="font-body-default text-body-default text-secondary">No users found.</p>
-            </div>
-          } @else {
-            <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] overflow-hidden shadow-sm">
-              <div class="bg-surface-container-low px-4 py-2.5 flex items-center text-secondary font-label-sm text-label-sm uppercase tracking-wider select-none">
-                <div class="w-6/12 min-w-0 pr-4">User</div>
-                <div class="w-4/12 min-w-0 pr-4">Email</div>
-                <div class="w-2/12 min-w-0 text-right">Role</div>
-              </div>
-
-              @for (user of users(); track user.id) {
-                <div class="px-4 py-3 flex items-center font-body-default text-body-default border-t border-surface-container-high">
-                  <div class="w-6/12 min-w-0 pr-4 flex items-center gap-2.5">
-                    <div
-                      class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center font-label-sm text-label-sm text-on-surface flex-shrink-0"
-                    >
-                      {{ initialsOf(user.username) }}
-                    </div>
-                    <span class="font-body-medium text-body-medium text-on-surface truncate">{{ user.username }}</span>
-                  </div>
-                  <div class="w-4/12 min-w-0 pr-4 text-secondary truncate">{{ user.email }}</div>
-                  <div class="w-2/12 min-w-0 text-right">
-                    <span class="px-1.5 py-0.5 bg-surface-container text-secondary font-label-sm text-label-sm rounded">{{
-                      user.role
-                    }}</span>
-                  </div>
-                </div>
-              }
-            </div>
-          }
-        }
-      }
-    </div>
-
-    @if (authService.isAdmin()) {
-      <div class="w-full lg:w-80 flex-shrink-0">
-        <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] p-5 shadow-sm">
-          <h2 class="font-headline-sm text-headline-sm text-on-surface mb-3">Create user</h2>
-          <form [formGroup]="createForm" (ngSubmit)="createUser()" class="flex flex-col gap-3">
-            <div class="flex flex-col gap-1">
-              <label class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Username</label>
-              <input
-                formControlName="username"
-                type="text"
-                class="h-9 px-2.5 text-[13px] bg-surface-container-low rounded focus:outline-none focus:ring-1 focus:ring-primary-container text-on-surface"
-              />
-            </div>
-
-            <div class="flex flex-col gap-1">
-              <label class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Email</label>
-              <input
-                formControlName="email"
-                type="email"
-                class="h-9 px-2.5 text-[13px] bg-surface-container-low rounded focus:outline-none focus:ring-1 focus:ring-primary-container text-on-surface"
-              />
-            </div>
-
-            <div class="flex flex-col gap-1">
-              <label class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Role</label>
-              <select
-                formControlName="role"
-                class="h-9 px-2 text-[13px] rounded bg-surface-container-low text-on-surface focus:outline-none focus:ring-1 focus:ring-primary-container"
-              >
-                @for (role of roles; track role) {
-                  <option [value]="role">{{ role }}</option>
-                }
-              </select>
-            </div>
-
-            <div class="flex flex-col gap-1">
-              <label class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Password</label>
-              <input
-                formControlName="password"
-                type="password"
-                class="h-9 px-2.5 text-[13px] bg-surface-container-low rounded focus:outline-none focus:ring-1 focus:ring-primary-container text-on-surface"
-              />
-            </div>
-
-            @if (errorMessage()) {
-              <p class="text-error font-body-default text-body-default" role="alert">{{ errorMessage() }}</p>
-            }
-
-            <button
-              type="submit"
-              [disabled]="creating()"
-              class="px-3.5 py-1.5 rounded-[6px] text-[13px] font-medium text-on-primary hover:opacity-90 transition-opacity bg-on-surface disabled:opacity-60"
-            >
-              Create user
-            </button>
-          </form>
-        </div>
+  @switch (state()) {
+    @case ('loading') {
+      <div class="flex justify-center py-16">
+        <span class="w-6 h-6 border-2 border-surface-container-high border-t-on-surface rounded-full animate-spin"></span>
       </div>
     }
-  </div>
+    @case ('error') {
+      <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] p-4 shadow-sm max-w-sm">
+        <p class="font-body-default text-body-default text-secondary mb-2">Could not load users.</p>
+        <button
+          (click)="load()"
+          class="px-3 py-1.5 rounded text-[13px] font-medium text-on-surface border border-surface-container-high hover:bg-surface-container transition-colors"
+        >
+          Retry
+        </button>
+      </div>
+    }
+    @case ('ready') {
+      @if (users().length === 0) {
+        <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] p-4 shadow-sm max-w-sm">
+          <p class="font-body-default text-body-default text-secondary">No users found.</p>
+        </div>
+      } @else {
+        <div class="bg-surface-container-lowest border border-surface-container-high rounded-[6px] overflow-hidden shadow-sm">
+          <div class="bg-surface-container-low px-4 py-2.5 flex items-center text-secondary font-label-sm text-label-sm uppercase tracking-wider select-none">
+            <div class="w-6/12 min-w-0 pr-4">User</div>
+            <div class="w-4/12 min-w-0 pr-4">Email</div>
+            <div class="w-2/12 min-w-0 text-right">Role</div>
+          </div>
+
+          @for (user of users(); track user.id) {
+            <div class="px-4 py-3 flex items-center font-body-default text-body-default border-t border-surface-container-high">
+              <div class="w-6/12 min-w-0 pr-4 flex items-center gap-2.5">
+                <div
+                  class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center font-label-sm text-label-sm text-on-surface flex-shrink-0"
+                >
+                  {{ initialsOf(user.username) }}
+                </div>
+                <span class="font-body-medium text-body-medium text-on-surface truncate">{{ user.username }}</span>
+              </div>
+              <div class="w-4/12 min-w-0 pr-4 text-secondary truncate">{{ user.email }}</div>
+              <div class="w-2/12 min-w-0 text-right">
+                <span class="px-1.5 py-0.5 bg-surface-container text-secondary font-label-sm text-label-sm rounded">{{
+                  user.role
+                }}</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (response()?.next || response()?.previous) {
+          <div class="flex items-center justify-between pt-3">
+            <p class="font-body-default text-body-default text-secondary">
+              {{ users().length }} of {{ response()?.count }} users
+            </p>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                (click)="previousPage()"
+                [disabled]="!response()?.previous"
+                class="px-3 py-1.5 rounded text-[13px] font-medium text-on-surface border border-surface-container-high hover:bg-surface-container transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                (click)="nextPage()"
+                [disabled]="!response()?.next"
+                class="px-3 py-1.5 rounded text-[13px] font-medium text-on-surface border border-surface-container-high hover:bg-surface-container transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        }
+      }
+    }
+  }
 </div>
+
+@if (dialogOpen()) {
+  <app-user-form-dialog (closed)="closeDialog()" (saved)="onUserCreated()" />
+}

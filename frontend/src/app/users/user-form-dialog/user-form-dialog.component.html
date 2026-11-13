@@ -1,0 +1,101 @@
+<div class="fixed inset-0 bg-inverse-surface/20 z-50 flex items-center justify-center p-4" (click)="close()">
+  <div
+    class="bg-surface-container-lowest rounded-lg max-w-md w-full p-5 shadow-xl flex flex-col gap-4"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Create user"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-[20px]">person_add</span>
+        <h3 class="font-headline-sm text-headline-sm text-on-surface">Create user</h3>
+      </div>
+      <button
+        type="button"
+        aria-label="Close dialog"
+        (click)="close()"
+        class="text-secondary hover:text-on-surface transition-colors p-1 rounded hover:bg-surface-container"
+      >
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-3">
+      <div class="flex flex-col gap-1">
+        <label class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Username</label>
+        <input
+          #usernameInput
+          formControlName="username"
+          type="text"
+          class="h-9 px-2.5 text-[13px] bg-surface-container-low rounded focus:outline-none focus:ring-1 focus:ring-primary-container text-on-surface"
+        />
+        @if (form.controls.username.touched && form.controls.username.invalid) {
+          <span class="text-error font-label-sm text-label-sm">Username is required.</span>
+        }
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Email</label>
+        <input
+          formControlName="email"
+          type="email"
+          class="h-9 px-2.5 text-[13px] bg-surface-container-low rounded focus:outline-none focus:ring-1 focus:ring-primary-container text-on-surface"
+        />
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          <span class="text-error font-label-sm text-label-sm">A valid email is required.</span>
+        }
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Role</label>
+          <select
+            formControlName="role"
+            class="h-9 px-2 text-[13px] rounded bg-surface-container-low text-on-surface focus:outline-none focus:ring-1 focus:ring-primary-container"
+          >
+            @for (role of roles; track role) {
+              <option [value]="role">{{ role }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Password</label>
+          <input
+            formControlName="password"
+            type="password"
+            class="h-9 px-2.5 text-[13px] bg-surface-container-low rounded focus:outline-none focus:ring-1 focus:ring-primary-container text-on-surface"
+          />
+          @if (form.controls.password.touched && form.controls.password.invalid) {
+            <span class="text-error font-label-sm text-label-sm">At least 8 characters.</span>
+          }
+        </div>
+      </div>
+
+      @if (errorMessage()) {
+        <p class="text-error font-body-default text-body-default" role="alert">{{ errorMessage() }}</p>
+      }
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button
+          type="button"
+          (click)="close()"
+          class="px-3 py-1.5 rounded text-[13px] font-medium text-secondary hover:bg-surface-container hover:text-on-surface transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          [disabled]="creating()"
+          class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[6px] text-[13px] font-medium text-on-primary hover:opacity-90 transition-opacity bg-on-surface disabled:opacity-60"
+        >
+          @if (creating()) {
+            <span class="w-3.5 h-3.5 border-2 border-surface-container-lowest/40 border-t-surface-container-lowest rounded-full animate-spin"></span>
+          }
+          Create user
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
