@@ -1,0 +1,27 @@
+<div class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2 w-full max-w-sm pointer-events-none">
+  @for (toast of toastService.toasts(); track toast.id) {
+    <div
+      role="status"
+      class="pointer-events-auto bg-surface-container-lowest shadow-xl rounded-[6px] border-l-4 p-3.5 flex items-start gap-2.5"
+      [class.border-primary]="toast.type === 'success'"
+      [class.border-error]="toast.type === 'error'"
+    >
+      <span
+        class="material-symbols-outlined text-[18px] flex-shrink-0"
+        [class.text-primary]="toast.type === 'success'"
+        [class.text-error]="toast.type === 'error'"
+      >
+        {{ toast.type === 'success' ? 'check_circle' : 'error' }}
+      </span>
+      <p class="font-body-default text-body-default text-on-surface flex-1">{{ toast.message }}</p>
+      <button
+        type="button"
+        aria-label="Dismiss notification"
+        (click)="toastService.dismiss(toast.id)"
+        class="text-secondary hover:text-on-surface transition-colors flex-shrink-0 p-0.5 rounded hover:bg-surface-container"
+      >
+        <span class="material-symbols-outlined text-[16px]">close</span>
+      </button>
+    </div>
+  }
+</div>
