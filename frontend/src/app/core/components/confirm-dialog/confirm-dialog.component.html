@@ -1,0 +1,45 @@
+<div class="fixed inset-0 bg-inverse-surface/20 z-50 flex items-center justify-center p-4" (click)="close()">
+  <div
+    class="bg-surface-container-lowest rounded-lg max-w-sm w-full p-5 shadow-xl flex flex-col gap-4"
+    role="alertdialog"
+    aria-modal="true"
+    [attr.aria-label]="title"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-[20px]" [class.text-error]="destructive" [class.text-primary]="!destructive">
+        {{ destructive ? 'warning' : 'help' }}
+      </span>
+      <h3 class="font-headline-sm text-headline-sm text-on-surface">{{ title }}</h3>
+    </div>
+
+    @if (message) {
+      <p class="font-body-default text-body-default text-secondary">{{ message }}</p>
+    }
+
+    <div class="flex items-center justify-end gap-2 pt-2">
+      <button
+        type="button"
+        (click)="close()"
+        class="px-3 py-1.5 rounded text-[13px] font-medium text-secondary hover:bg-surface-container hover:text-on-surface transition-colors"
+      >
+        {{ cancelLabel }}
+      </button>
+      <button
+        type="button"
+        (click)="confirm()"
+        [disabled]="confirming"
+        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[6px] text-[13px] font-medium transition-opacity hover:opacity-90 disabled:opacity-60"
+        [class.bg-error]="destructive"
+        [class.text-on-error]="destructive"
+        [class.bg-on-surface]="!destructive"
+        [class.text-on-primary]="!destructive"
+      >
+        @if (confirming) {
+          <span class="w-3.5 h-3.5 border-2 border-current/40 border-t-current rounded-full animate-spin"></span>
+        }
+        {{ confirmLabel }}
+      </button>
+    </div>
+  </div>
+</div>
